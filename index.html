@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đại Số Tuyến Tính - Kiên So Sad</title>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --bg-gradient: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: rgba(148, 163, 184, 0.1);
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --highlight-bg: rgba(59, 130, 246, 0.2);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            max-width: 95%;
+            padding: 100px 20px 40px;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Background effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.15;
+            filter: blur(2px);
+            pointer-events: none;
+            z-index: -1;
+            transition: opacity 0.3s;
+        }
+
+        h1 { 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 30px;
+            margin: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            font-size: 1.8rem;
+            text-align: left;
+            color: white;
+        }
+        
+        h2 { color: var(--text-main); margin-top: 0; }
+
+        .controls {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 10px 15px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            width: 60px;
+            text-align: center;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        button {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 5px;
+        }
+
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            filter: brightness(1.1);
+        }
+
+        /* Ẩn nút tăng giảm (spinners) trong ô nhập số */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Matrix Input Grid */
+        #matrix-input-area {
+            display: grid;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .matrix-row { display: flex; gap: 10px; }
+        .matrix-cell { width: 60px; }
+
+        /* Steps Display */
+        .step-container {
+            background: var(--card-bg);
+            margin-bottom: 20px;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            color: var(--text-main);
+        }
+
+        .step-description {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #60a5fa;
+        }
+
+        .matrix-display {
+            font-family: 'Courier New', Courier, monospace;
+            display: inline-block;
+            position: relative;
+            padding: 0 10px;
+        }
+
+        .matrix-display::before, .matrix-display::after {
+            content: "";
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 6px;
+            border: 2px solid var(--text-main);
+        }
+        .matrix-display::before { left: 0; border-right: none; }
+        .matrix-display::after { right: 0; border-left: none; }
+
+        table { border-collapse: collapse; margin: 0 auto; }
+        td { padding: 8px 12px; text-align: right; font-size: 1.1em; }
+        
+        .highlight { background-color: var(--highlight-bg); color: #60a5fa; font-weight: bold; border-radius: 4px; }
+        .separator { border-left: 2px solid var(--text-muted); }
+
+        /* Button Grid for Actions */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .file-upload-btn {
+            background: linear-gradient(135deg, #475569, #334155);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 5px;
+            display: inline-block;
+        }
+
+        .file-upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            filter: brightness(1.1);
+        }
+
+        .export-buttons {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        @media print {
+            body { background: white !important; color: black !important; }
+            body::before { display: none; }
+            .controls { display: none !important; }
+            h1, .action-buttons, .export-buttons { display: none !important; }
+            .step-container { background: white !important; color: black !important; border: 1px solid #ccc; box-shadow: none; break-inside: avoid; }
+            .step-description { color: #000 !important; }
+            .highlight { background-color: #eee !important; color: #000 !important; }
+            .matrix-display::before, .matrix-display::after { border-color: #000 !important; }
+            .separator { border-color: #000 !important; }
+            #solution-steps { display: block !important; }
+        }
+
+        /* Menu Styles */
+        #main-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 10px 0;
+        }
+
+        .menu-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 30px 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 160px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 20px rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            background: rgba(30, 41, 59, 0.85);
+        }
+
+        .menu-card:hover::after {
+            opacity: 1;
+        }
+
+        .menu-card h3 {
+            margin: 15px 0 0;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            transition: color 0.3s;
+            z-index: 1;
+        }
+
+        .menu-card:hover h3 {
+            color: #60a5fa;
+        }
+
+        .menu-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            transition: transform 0.3s ease;
+            z-index: 1;
+        }
+
+        .menu-card:hover .menu-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Calculator View Header */
+        .calc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .calc-header h2 { margin: 0; font-size: 1.5rem; }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 16px;
+            box-shadow: none;
+            margin: 0;
+        }
+        
+        .back-btn:hover {
+            background: var(--highlight-bg);
+            transform: none;
+        }
+
+        #dimension-inputs input {
+            width: 45px;
+        }
+
+        /* History Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 { margin: 0; color: var(--text-main); }
+
+        .modal-header .close-btn { background: none; border: none; font-size: 2rem; color: var(--text-muted); cursor: pointer; padding: 0; margin: 0; line-height: 1; box-shadow: none; }
+
+        .modal-body { overflow-y: auto; }
+
+        #history-list { list-style: none; padding: 0; margin: 0; }
+
+        #history-list li { background: var(--input-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-color); }
+
+        #history-list .history-info { flex-grow: 1; }
+
+        #history-list .history-type { font-weight: 600; color: var(--text-main); }
+
+        #history-list .history-time { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
+        #history-list .history-actions button { padding: 6px 12px; font-size: 0.9rem; margin-left: 8px; }
+
+
+        /* Matrix Wrapper Styles */
+        .matrix-wrapper {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px 15px 15px;
+            margin: 10px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.02);
+            display: inline-block;
+            vertical-align: top;
+            width: 100%;
+        }
+        .matrix-label {
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background: var(--card-bg);
+            padding: 0 10px;
+            font-weight: bold;
+            color: #60a5fa;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            h1 {
+                position: static;
+                font-size: 1.5rem;
+                padding: 20px;
+                text-align: center;
+            }
+            body {
+                padding: 0 10px 40px;
+            }
+            .controls {
+                padding: 20px 15px;
+            }
+            .matrix-cell {
+                flex: 1; /* Distribute space equally */
+                min-width: 40px; /* Prevent cells from being too tiny */
+                width: auto; /* Override desktop fixed width */
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            #matrix-input-area {
+                display: block;
+                text-align: center;
+            }
+            .matrix-wrapper {
+                display: inline-block;
+                width: 100%;
+                max-width: 100%;
+                margin-bottom: 20px;
+                vertical-align: top;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+<body>
+
+    <h1>Đại Số Tuyến Tính</h1>
+    
+    <!-- Main Menu -->
+    <div id="main-menu">
+        <div class="menu-card" onclick="selectMode('inverse-gauss')">
+            <div class="menu-icon"></div>
+            <h3>Nghịch Đảo (Gauss)</h3>
+        </div>
+        <div class="menu-card" onclick="selectMode('inverse-adj')">
+            <div class="menu-icon"></div>
+            <h3>Tính ma trận nghịch đảo</h3>
+        </div>
+        <div class="menu-card" onclick="selectMode('determinant')">
+            <div class="menu-icon"></div>
+            <h3>Định Thức (Det)</h3>
+        </div>
+        <div class="menu-card" onclick="selectMode('determinant-laplace')">
+            <div class="menu-icon"></div>
+            <h3>Định Thức (Laplace)</h3>
+        </div>
+        <div class="menu-card" onclick="selectMode('determinant-geo')">
+            <div class="menu-icon"></div>
+            <h3>Định Thức (Hình Học)</h3>
+        </div>
+        <div class="menu-card" onclick="selectMode('rank')">
+            <div class="menu-icon"></div>
+            <h3>Hạng Ma Trận (Rank)</h3>
+        </div>
+        <div class="menu-card" onclick="selectMode('linear-system')">
+            <div class="menu-icon">x=</div>
+            <h3>Giải Hệ PT (Ax=B)</h3>
+        </div>
+        <div class="menu-card" onclick="selectMode('eigen')">
+            <div class="menu-icon"></div>
+            <h3>Giá Trị Riêng</h3>
+        </div>
+        <div class="menu-card" onclick="selectMode('multiplication')">
+            <div class="menu-icon"></div>
+            <h3>Nhân Ma Trận (AxB)</h3>
+        </div>
+        <div class="menu-card" onclick="selectMode('power')">
+            <div class="menu-icon"></div>
+            <h3>Lũy Thừa (A^k)</h3>
+        </div>
+        <div class="menu-card" onclick="selectMode('laplace')">
+            <div class="menu-icon">∫</div>
+            <h3>Biến đổi Laplace</h3>
+        </div>
+        <div class="menu-card" onclick="selectMode('inverse-laplace')">
+            <div class="menu-icon">↩</div>
+            <h3>Laplace Ngược</h3>
+        </div>
+    </div>
+
+    <!-- Calculator View (Hidden by default) -->
+    <div id="calculator-view" style="display: none;">
+        <div class="calc-header">
+            <button class="back-btn" onclick="goToHome()">⬅ Quay lại</button>
+            <h2 id="feature-title">Tính Toán</h2>
+            <div style="width: 80px;"></div> <!-- Spacer for centering -->
+        </div>
+
+        <div class="controls" id="matrix-controls">
+            <div id="dimension-inputs" style="display: inline-block;"></div>
+            <button onclick="generateInputs()">Tạo Lưới</button>
+            <label for="csv-input" class="file-upload-btn">📂 Tải lên CSV</label>
+            <input type="file" id="csv-input" accept=".csv" style="display: none;">
+        </div>
+
+        <!-- Laplace Controls -->
+        <div class="controls" id="laplace-controls" style="display:none;">
+            <div style="margin-bottom: 15px;">
+                <label id="laplace-label" style="font-size: 1.1rem; font-weight: 600;">Chọn hàm f(t): </label>
+                <select id="laplace-func-type" onchange="updateLaplaceInputs()" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-size: 1rem;">
+                    <option value="const">Hằng số (C)</option>
+                    <option value="poly">Đa thức (t^n)</option>
+                    <option value="exp">Mũ (e^at)</option>
+                    <option value="sin">Sin (sin kt)</option>
+                    <option value="cos">Cos (cos kt)</option>
+                    <option value="exp_sin">e^at * sin(kt)</option>
+                    <option value="exp_cos">e^at * cos(kt)</option>
+                </select>
+            </div>
+            <div id="laplace-inputs" style="display:flex; gap:15px; justify-content:center; align-items:center; margin-bottom: 20px; flex-wrap: wrap;">
+                <!-- Dynamic inputs -->
+            </div>
+            <button id="laplace-btn" onclick="calculateLaplaceTransform()" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Biến đổi sang F(s)</button>
+        </div>
+
+        <div class="controls" id="input-container" style="display:none;">
+            <div id="matrix-input-area"></div>
+            <div id="action-area" style="margin-top: 20px;"></div>
+        </div>
+
+        <div id="solution-steps"></div>
+
+        <div class="export-buttons">
+            <button onclick="openHistoryModal()" style="background: linear-gradient(135deg, #475569, #334155)">📜 Lịch sử</button>
+            <button onclick="exportToImage()" style="background: linear-gradient(135deg, #475569, #334155)">📸 Lưu Ảnh</button>
+            <button onclick="window.print()" style="background: linear-gradient(135deg, #475569, #334155)">🖨️ In / Lưu PDF</button>
+        </div>
+    </div>
+
+    <!-- History Modal HTML -->
+    <div id="history-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Lịch sử các bài toán</h2>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button onclick="clearAllHistory()" style="background: #ef4444; padding: 6px 12px; font-size: 0.9rem;">Xóa tất cả</button>
+                    <button class="close-btn" onclick="closeHistoryModal()">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <ul id="history-list"></ul>
+            </div>
+        </div>
+    </div>
+
+<script>
+    /**
+     * Class xử lý phân số để tính toán chính xác
+     */
+    class Fraction {
+        static gcd(a, b) { return b === 0 ? a : Fraction.gcd(b, a % b); }
+
+        constructor(numerator = 0, denominator = 1) {
+            if (denominator === 0) throw new Error("Mẫu số không thể bằng 0");
+            if (denominator < 0) { numerator = -numerator; denominator = -denominator; }
+            this.num = numerator;
+            this.den = denominator;
+            this.simplify();
+        }
+
+        simplify() {
+            if (this.num === 0) { this.den = 1; return; }
+            const common = Fraction.gcd(Math.abs(this.num), this.den);
+            this.num /= common;
+            this.den /= common;
+        }
+
+        static fromString(str) {
+            if (typeof str !== 'string') str = String(str);
+            if (str.includes('/')) {
+                const parts = str.split('/');
+                return new Fraction(parseInt(parts[0]), parseInt(parts[1]));
+            }
+            const num = parseInt(str);
+            return new Fraction(isNaN(num) ? 0 : num, 1);
+        }
+
+        toString() { return this.den === 1 ? `${this.num}` : `${this.num}/${this.den}`; }
+
+        add(other) { return new Fraction(this.num * other.den + other.num * this.den, this.den * other.den); }
+        subtract(other) { return new Fraction(this.num * other.den - other.num * this.den, this.den * other.den); }
+        multiply(other) { return new Fraction(this.num * other.num, this.den * other.den); }
+        divide(other) { return new Fraction(this.num * other.den, this.den * other.num); }
+        isZero() { return this.num === 0; }
+        isOne() { return this.num === 1 && this.den === 1; }
+    }
+
+    let currentSize = 3;
+    let currentMode = '';
+    let g_rowsA = 3, g_colsA = 3;
+    let g_rowsB = 3, g_colsB = 3;
+
+    const MODES = {
+        'inverse-gauss': { title: 'Nghịch Đảo (Gauss-Jordan)', hasB: false, hasMatrixB: false, func: calculateInverse, color: '#2563eb' },
+        'inverse-adj': { title: 'Nghịch Đảo (Phần phụ đại số)', hasB: false, hasMatrixB: false, func: calculateInverseByAdjugate, color: '#d97706' },
+        'determinant': { title: 'Tính Định Thức', hasB: false, hasMatrixB: false, func: calculateDeterminant, color: '#059669' },
+        'determinant-laplace': { title: 'Tính Định Thức (Khai triển Laplace)', hasB: false, hasMatrixB: false, func: calculateDeterminantLaplace, color: '#10b981' },
+        'determinant-geo': { title: 'Định Thức & Hình Học (Area/Volume)', hasB: false, hasMatrixB: false, func: calculateGeometricDeterminant, color: '#0ea5e9' },
+        'rank': { title: 'Tìm Hạng Ma Trận (Rank)', hasB: false, hasMatrixB: false, func: calculateRank, color: '#7c3aed' },
+        'linear-system': { title: 'Giải Hệ PT (Ax = B)', hasB: true, hasMatrixB: false, func: solveLinearSystem, color: '#db2777' },
+        'eigen': { title: 'Tìm Giá Trị Riêng', hasB: false, hasMatrixB: false, func: calculateEigenvalues, color: '#0891b2' },
+        'multiplication': { title: 'Nhân Ma Trận (A × B)', hasB: false, hasMatrixB: true, func: calculateMatrixMultiplication, color: '#8b5cf6' },
+        'power': { title: 'Lũy Thừa Ma Trận (A^k)', hasB: false, hasMatrixB: false, hasK: true, func: calculateMatrixPower, color: '#f59e0b' },
+        'laplace': { title: 'Biến đổi Laplace', isLaplace: true, isInverse: false, color: '#f59e0b' },
+        'inverse-laplace': { title: 'Biến đổi Laplace Ngược', isLaplace: true, isInverse: true, color: '#d97706' }
+    };
+
+    function selectMode(mode) {
+        currentMode = mode;
+        document.getElementById('main-menu').style.display = 'none';
+        document.getElementById('calculator-view').style.display = 'block';
+        document.getElementById('feature-title').innerText = MODES[mode].title;
+        document.getElementById('input-container').style.display = 'none';
+        document.getElementById('solution-steps').innerHTML = '';
+
+        // Update Dimension Inputs
+        const dimContainer = document.getElementById('dimension-inputs');
+        if (mode === 'multiplication') {
+            dimContainer.innerHTML = `
+                <label>A:</label> <input type="number" id="rowsA" value="2" min="1" max="6"> x <input type="number" id="colsA" value="3" min="1" max="6">
+                <span style="margin:0 10px; color:var(--text-muted)">|</span>
+                <label>B:</label> <input type="number" id="rowsB" value="3" min="1" max="6"> x <input type="number" id="colsB" value="2" min="1" max="6">
+            `;
+        } else {
+            dimContainer.innerHTML = `<label>Kích thước (N x N): </label><input type="number" id="size" value="3" min="2" max="6">`;
+        }
+
+        const config = MODES[mode];
+        if (config.isLaplace) {
+            document.getElementById('matrix-controls').style.display = 'none';
+            document.getElementById('laplace-controls').style.display = 'block';
+            setupLaplaceUI();
+            renderLaplaceTheory();
+        } else {
+            document.getElementById('matrix-controls').style.display = 'block';
+            document.getElementById('laplace-controls').style.display = 'none';
+            generateInputs(); // Auto generate inputs for default size
+        }
+    }
+
+    function goToHome() {
+        document.getElementById('main-menu').style.display = 'grid';
+        document.getElementById('calculator-view').style.display = 'none';
+        document.getElementById('solution-steps').innerHTML = '';
+    }
+
+    function createInput(id) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'matrix-cell';
+        input.value = Math.floor(Math.random() * 9) + 1;
+        input.id = id;
+        return input;
+    }
+
+    // 1. Tạo ô nhập liệu
+    function generateInputs() {
+        const config = MODES[currentMode];
+        
+        if (currentMode === 'multiplication') {
+            g_rowsA = parseInt(document.getElementById('rowsA').value) || 2;
+            g_colsA = parseInt(document.getElementById('colsA').value) || 3;
+            g_rowsB = parseInt(document.getElementById('rowsB').value) || 3;
+            g_colsB = parseInt(document.getElementById('colsB').value) || 2;
+            currentSize = g_rowsA; // Fallback
+        } else {
+            currentSize = parseInt(document.getElementById('size').value) || 3;
+            g_rowsA = g_colsA = currentSize;
+        }
+
+        const container = document.getElementById('matrix-input-area');
+        container.innerHTML = '';
+
+        if (config && config.hasMatrixB) {
+            container.style.display = 'flex';
+            container.style.flexWrap = 'wrap';
+            container.style.gap = '20px';
+            
+            // Matrix A Container
+            const divA = document.createElement('div');
+            divA.className = 'matrix-wrapper';
+            divA.innerHTML = '<div class="matrix-label">Ma trận A</div>';
+            const gridA = document.createElement('div');
+            gridA.style.display = 'grid';
+            gridA.style.gap = '10px';
+            for (let i = 0; i < g_rowsA; i++) {
+                const rDiv = document.createElement('div');
+                rDiv.className = 'matrix-row';
+                for (let j = 0; j < g_colsA; j++) {
+                    rDiv.appendChild(createInput(`m-${i}-${j}`));
+                }
+                gridA.appendChild(rDiv);
+            }
+            divA.appendChild(gridA);
+            container.appendChild(divA);
+
+            // Matrix B Container
+            const divB = document.createElement('div');
+            divB.className = 'matrix-wrapper';
+            divB.innerHTML = '<div class="matrix-label">Ma trận B</div>';
+            const gridB = document.createElement('div');
+            gridB.style.display = 'grid';
+            gridB.style.gap = '10px';
+            for (let i = 0; i < g_rowsB; i++) {
+                const rDiv = document.createElement('div');
+                rDiv.className = 'matrix-row';
+                for (let j = 0; j < g_colsB; j++) {
+                    rDiv.appendChild(createInput(`mb-${i}-${j}`));
+                }
+                gridB.appendChild(rDiv);
+            }
+            divB.appendChild(gridB);
+            container.appendChild(divB);
+
+        } else if (config) {
+            container.style.display = 'grid';
+            container.style.gap = '10px';
+            
+            // Wrap single matrix in a border too for consistency
+            const wrapper = document.createElement('div');
+            wrapper.className = 'matrix-wrapper';
+            wrapper.innerHTML = `<div class="matrix-label">Ma trận A ${config.hasB ? '| Vector B' : ''}</div>`;
+            const grid = document.createElement('div');
+            grid.style.display = 'grid';
+            grid.style.gap = '10px';
+            
+            for (let i = 0; i < currentSize; i++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'matrix-row';
+                for (let j = 0; j < currentSize; j++) {
+                    rowDiv.appendChild(createInput(`m-${i}-${j}`));
+                }
+
+                if (config.hasB) {
+                    // Thêm cột vector B
+                    const sep = document.createElement('span');
+                    sep.innerHTML = '=';
+                    sep.style.margin = 'auto 10px';
+                    sep.style.fontWeight = 'bold';
+                    rowDiv.appendChild(sep);
+
+                    const inputB = createInput(`b-${i}`);
+                    inputB.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
+                    inputB.style.borderColor = '#10b981';
+                    rowDiv.appendChild(inputB);
+                }
+                
+                grid.appendChild(rowDiv);
+            }
+            wrapper.appendChild(grid);
+            container.appendChild(wrapper);
+        }
+
+        if (config && config.hasK) {
+            const kDiv = document.createElement('div');
+            kDiv.style.width = '100%';
+            kDiv.style.display = 'flex';
+            kDiv.style.justifyContent = 'center';
+            kDiv.style.alignItems = 'center';
+            kDiv.style.marginTop = '20px';
+            kDiv.innerHTML = '<span style="font-size: 1.1rem; font-weight: 600; margin-right: 10px;">Số mũ k = </span>';
+            const inputK = createInput('exponent-k');
+            inputK.value = '2';
+            kDiv.appendChild(inputK);
+            container.appendChild(kDiv);
+        }
+        document.getElementById('input-container').style.display = 'block';
+        document.getElementById('solution-steps').innerHTML = '';
+
+        // Update Action Button
+        const actionArea = document.getElementById('action-area');
+        actionArea.innerHTML = '';
+        if (config) {
+            const btn = document.createElement('button');
+            btn.innerText = "Tính Toán Ngay";
+            btn.style.background = config.color;
+            btn.style.fontSize = '1.1rem';
+            btn.style.padding = '12px 30px';
+            btn.onclick = config.func;
+            actionArea.appendChild(btn);
+        }
+    }
+
+    // 2. Hàm lấy dữ liệu từ UI
+    function getMatrixFromInput() {
+        let matrix = [];
+        for (let i = 0; i < g_rowsA; i++) {
+            let row = [];
+            for (let j = 0; j < g_colsA; j++) {
+                let valStr = document.getElementById(`m-${i}-${j}`).value;
+                row.push(Fraction.fromString(valStr));
+            }
+            matrix.push(row);
+        }
+        return matrix;
+    }
+
+    function getVectorBFromInput() {
+        let vector = [];
+        for (let i = 0; i < currentSize; i++) {
+            let valStr = document.getElementById(`b-${i}`).value;
+            vector.push(Fraction.fromString(valStr));
+        }
+        return vector;
+    }
+
+    function getMatrixBFromInput() {
+        let matrix = [];
+        for (let i = 0; i < g_rowsB; i++) {
+            let row = [];
+            for (let j = 0; j < g_colsB; j++) {
+                let valStr = document.getElementById(`mb-${i}-${j}`).value;
+                row.push(Fraction.fromString(valStr));
+            }
+            matrix.push(row);
+        }
+        return matrix;
+    }
+
+    // 3. Hàm hiển thị một bước (Render HTML)
+    function renderStep(matrix, description, pivotRow = -1, pivotCol = -1) {
+        const stepsDiv = document.getElementById('solution-steps');
+        const stepBox = document.createElement('div');
+        stepBox.className = 'step-container';
+
+        let html = `<div class="step-description">${description}</div>`;
+        html += `<div style="text-align:center;"><div class="matrix-display"><table>`;
+
+        for (let i = 0; i < matrix.length; i++) {
+            html += `<tr>`;
+            for (let j = 0; j < matrix[i].length; j++) {
+                // Tô màu phần tử đang xử lý
+                const isPivot = (i === pivotRow && j === pivotCol);
+                const isAugmentedSeparator = (j === currentSize); // Vạch ngăn cách [A | I]
+                
+                let cellClass = isPivot ? 'highlight' : '';
+                if (isAugmentedSeparator) cellClass += ' separator';
+
+                // Làm tròn số hiển thị
+                let val = matrix[i][j];
+                let displayVal = val.toString();
+                
+                html += `<td class="${cellClass}">${displayVal}</td>`;
+            }
+            html += `</tr>`;
+        }
+        html += `</table></div></div>`;
+        
+        stepBox.innerHTML = html;
+        stepsDiv.appendChild(stepBox);
+    }
+
+    // 4. Thuật toán Gauss-Jordan tìm nghịch đảo
+    function calculateInverse() {
+        document.getElementById('solution-steps').innerHTML = '<h2>Chi tiết các bước giải:</h2>';
+        let A = getMatrixFromInput();
+        let n = currentSize;
+
+        // Tạo ma trận mở rộng [A | I]
+        let M = [];
+        for (let i = 0; i < n; i++) {
+            let row = [...A[i]];
+            for (let j = 0; j < n; j++) {
+                row.push(i === j ? new Fraction(1) : new Fraction(0));
+            }
+            M.push(row);
+        }
+
+        renderStep(M, "Bước 1: Lập ma trận mở rộng [A | I]");
+
+        // Quá trình khử Gauss
+        for (let i = 0; i < n; i++) {
+            // Tìm pivot (phần tử trụ)
+            let pivot = M[i][i];
+            
+            // Nếu pivot = 0, cần hoán đổi hàng
+            if (pivot.isZero()) {
+                // Tìm hàng bên dưới để đổi
+                let swapRow = -1;
+                for(let k = i + 1; k < n; k++) {
+                    if(!M[k][i].isZero()) { swapRow = k; break; }
+                }
+                if(swapRow !== -1) {
+                    [M[i], M[swapRow]] = [M[swapRow], M[i]];
+                    renderStep(M, `Hoán đổi hàng ${i+1} và hàng ${swapRow+1} để có phần tử trụ khác 0.`);
+                    pivot = M[i][i];
+                } else {
+                    document.getElementById('solution-steps').innerHTML += '<div class="step-container highlight" style="color:red">Ma trận suy biến (Định thức = 0), không có nghịch đảo!</div>';
+                    return;
+                }
+            }
+
+            // Chia hàng i cho pivot để phần tử trụ thành 1
+            if (!pivot.isOne()) {
+                let pivotInv = new Fraction(pivot.den, pivot.num);
+                for (let j = 0; j < 2 * n; j++) {
+                    M[i][j] = M[i][j].multiply(pivotInv);
+                }
+                renderStep(M, `Nhân hàng ${i+1} với ${pivotInv.toString()} để phần tử trụ (${i+1},${i+1}) bằng 1.`, i, i);
+            }
+
+            // Khử các hàng khác về 0
+            for (let k = 0; k < n; k++) {
+                if (k !== i) {
+                    let factor = M[k][i];
+                    if (!factor.isZero()) {
+                        for (let j = 0; j < 2 * n; j++) {
+                            M[k][j] = M[k][j].subtract(factor.multiply(M[i][j]));
+                        }
+                        renderStep(M, `Lấy hàng ${k+1} trừ đi (${factor.toString()}) lần hàng ${i+1}.`, k, i);
+                    }
+                }
+            }
+        }
+
+        // Tách kết quả
+        let inverse = [];
+        for(let i=0; i<n; i++) {
+            inverse.push(M[i].slice(n, 2*n));
+        }
+        
+        renderStep(inverse, "Kết quả: Ma trận nghịch đảo A⁻¹ (Phần bên phải của ma trận mở rộng)");
+        saveToHistory('Nghịch đảo (Gauss-Jordan)', A, null);
+    }
+
+    // --- Các hàm hỗ trợ cho phương pháp Phần phụ đại số ---
+    function getMinor(matrix, row, col) {
+        return matrix.filter((_, r) => r !== row).map(r => r.filter((_, c) => c !== col));
+    }
+
+    function computeDet(matrix) {
+        const n = matrix.length;
+        if (n === 0) return new Fraction(1);
+        if (n === 1) return matrix[0][0];
+        if (n === 2) {
+            return matrix[0][0].multiply(matrix[1][1]).subtract(matrix[0][1].multiply(matrix[1][0]));
+        }
+        
+        let det = new Fraction(0);
+        for (let j = 0; j < n; j++) {
+            const minorDet = computeDet(getMinor(matrix, 0, j));
+            const term = matrix[0][j].multiply(minorDet);
+            det = (j % 2 === 0) ? det.add(term) : det.subtract(term);
+        }
+        return det;
+    }
+
+    function transpose(matrix) {
+        if (matrix.length === 0) return [];
+        return matrix[0].map((_, colIndex) => matrix.map(row => row[colIndex]));
+    }
+
+    function matrixToHtmlTable(matrix) {
+        let html = '<table style="display:inline-table; vertical-align:middle; border-left:1px solid black; border-right:1px solid black; margin: 0 5px;">';
+        for (let row of matrix) {
+            html += '<tr>';
+            for (let val of row) {
+                html += `<td style="padding:2px 5px; text-align:center;">${val.toString()}</td>`;
+            }
+            html += '</tr>';
+        }
+        html += '</table>';
+        return html;
+    }
+
+    function calculateInverseByAdjugate() {
+        const stepsDiv = document.getElementById('solution-steps');
+        stepsDiv.innerHTML = '<h2>Chi tiết tìm Nghịch đảo bằng Phần phụ đại số:</h2>';
+        let A = getMatrixFromInput();
+        const n = currentSize;
+
+        // --- Step 1: Calculate Determinant ---
+        const detA = computeDet(A);
+        let step1Html = `<div class="step-description">Bước 1: Tính định thức của ma trận A.</div>`;
+        step1Html += `Sử dụng khai triển Laplace, ta có: det(A) = <b>${detA.toString()}</b>`;
+        stepsDiv.appendChild(Object.assign(document.createElement('div'), {className: 'step-container', innerHTML: step1Html}));
+
+        if (detA.isZero()) {
+            stepsDiv.innerHTML += `<div class="step-container highlight" style="color:red">det(A) = 0, ma trận không có nghịch đảo.</div>`;
+            return;
+        }
+
+        // --- Step 2: Calculate Cofactor Matrix ---
+        stepsDiv.innerHTML += `<div class="step-container"><div class="step-description">Bước 2: Tìm ma trận các phần phụ đại số C.</div></div>`;
+        
+        let cofactorMatrix = Array(n).fill(0).map(() => Array(n));
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                const minor = getMinor(A, i, j);
+                const minorDet = computeDet(minor);
+                const sign = ((i + j) % 2 === 0) ? new Fraction(1) : new Fraction(-1);
+                cofactorMatrix[i][j] = sign.multiply(minorDet);
+
+                let stepHtml = `Tính C<sub>${i+1}${j+1}</sub> = (-1)<sup>${i+1}+${j+1}</sup> × |M<sub>${i+1}${j+1}</sub>| = ${sign.toString()} × ${matrixToHtmlTable(minor)} = <b>${cofactorMatrix[i][j].toString()}</b>`;
+                stepsDiv.appendChild(Object.assign(document.createElement('div'), {className: 'step-container', innerHTML: stepHtml}));
+            }
+        }
+        renderStep(cofactorMatrix, "Ma trận phần phụ đại số C:");
+
+        // --- Step 3 & 4: Adjugate and Inverse ---
+        const adjugateMatrix = transpose(cofactorMatrix);
+        renderStep(adjugateMatrix, "Bước 3: Tìm ma trận phụ hợp adj(A) = C<sup>T</sup>");
+
+        const detInv = new Fraction(1, 1).divide(detA);
+        const inverseMatrix = adjugateMatrix.map(row => row.map(val => val.multiply(detInv)));
+        
+        let finalHtml = `<div class="step-description">Bước 4: Tính ma trận nghịch đảo A⁻¹ = (1/det(A)) × adj(A)</div>`;
+        finalHtml += `<div style="font-size: 1.1em; line-height: 1.5;">A⁻¹ = ${detInv.toString()} × ${matrixToHtmlTable(adjugateMatrix)}</div>`;
+        stepsDiv.appendChild(Object.assign(document.createElement('div'), {className: 'step-container', innerHTML: finalHtml}));
+
+        renderStep(inverseMatrix, "Kết quả: Ma trận nghịch đảo A⁻¹");
+        saveToHistory('Nghịch đảo (Phần phụ đại số)', A, null);
+    }
+
+    function calculateDeterminantLaplace() {
+        const stepsDiv = document.getElementById('solution-steps');
+        stepsDiv.innerHTML = '<h2>Chi tiết tính Định thức (Khai triển Laplace hàng 1):</h2>';
+        let A = getMatrixFromInput();
+        let n = currentSize;
+
+        if (n === 1) {
+             stepsDiv.innerHTML += `<div class="step-container">Ma trận 1x1: Det = ${A[0][0].toString()}</div>`;
+             saveToHistory('Định Thức (Laplace)', A, null);
+             return;
+        }
+
+        // Bước 1: Hiển thị công thức khai triển
+        let step1Html = `<div class="step-description">Bước 1: Khai triển theo hàng đầu tiên</div>`;
+        step1Html += `<div style="font-size: 1.1em; line-height: 2; overflow-x: auto;">det(A) = `;
+        
+        let values = [];
+        for (let j = 0; j < n; j++) {
+            let val = A[0][j];
+            let signStr = (j % 2 === 0) ? (j === 0 ? '' : ' + ') : ' - ';
+            let minor = getMinor(A, 0, j);
+            let minorDet = computeDet(minor);
+            
+            values.push({ sign: (j % 2 === 0) ? 1 : -1, val: val, minorDet: minorDet });
+            step1Html += `${signStr} ${val.toString()} &times; ${matrixToHtmlTable(minor)}`;
+        }
+        step1Html += `</div>`;
+        stepsDiv.appendChild(Object.assign(document.createElement('div'), {className: 'step-container', innerHTML: step1Html}));
+
+        // Bước 2: Kết quả
+        let finalDet = computeDet(A);
+        let step2Html = `<div class="step-description">Bước 2: Tính toán giá trị các định thức con và tổng hợp</div>`;
+        step2Html += `<div> = ` + values.map((v, i) => {
+            let s = (i === 0) ? '' : (v.sign > 0 ? ' + ' : ' - ');
+            return `${s} ${v.val.toString()} &times; (${v.minorDet.toString()})`;
+        }).join("") + `</div>`;
+        step2Html += `<br><div class="highlight" style="display:inline-block; padding:5px;">Kết quả cuối cùng: det(A) = ${finalDet.toString()}</div>`;
+        stepsDiv.appendChild(Object.assign(document.createElement('div'), {className: 'step-container', innerHTML: step2Html}));
+        
+        saveToHistory('Định Thức (Laplace)', A, null);
+    }
+
+    function calculateGeometricDeterminant() {
+        const stepsDiv = document.getElementById('solution-steps');
+        stepsDiv.innerHTML = '<h2>Chi tiết Định thức theo ý nghĩa Hình học:</h2>';
+        let A_frac = getMatrixFromInput();
+        let n = currentSize;
+
+        if (n !== 2 && n !== 3) {
+            stepsDiv.innerHTML += `<div class="step-container highlight" style="color:red">Chức năng biểu diễn hình học chỉ hỗ trợ ma trận kích thước 2x2 (Diện tích) và 3x3 (Thể tích).</div>`;
+            return;
+        }
+
+        // Convert Fraction to float for calculation and plotting
+        let A = A_frac.map(row => row.map(val => val.num / val.den));
+        
+        // Get column vectors
+        let vectors = [];
+        for(let j=0; j<n; j++) {
+            let vec = [];
+            for(let i=0; i<n; i++) vec.push(A[i][j]);
+            vectors.push(vec);
+        }
+
+        let resultHtml = '';
+        let plotData = [];
+        let layout = {};
+
+        if (n === 2) {
+            // 2D Case: Area of Parallelogram
+            let u = vectors[0]; // [x1, y1]
+            let v = vectors[1]; // [x2, y2]
+            
+            // Geometric calculation: Cross product in 2D (ad - bc)
+            let detVal = u[0]*v[1] - u[1]*v[0];
+            
+            resultHtml += `<div class="step-container">
+                <div class="step-description">Ý nghĩa hình học (2D)</div>
+                <div>Định thức của ma trận 2x2 đại diện cho <b>Diện tích có hướng</b> của hình bình hành tạo bởi hai vector cột.</div>
+                <ul style="margin: 10px 0;">
+                    <li>Vector cột 1: <b>u</b> = (${u[0]}, ${u[1]})</li>
+                    <li>Vector cột 2: <b>v</b> = (${v[0]}, ${v[1]})</li>
+                </ul>
+                <div style="font-size: 1.1em;">Diện tích = | det(A) | = | ${u[0]} × ${v[1]} - ${u[1]} × ${v[0]} | = | ${detVal} | = <b>${Math.abs(detVal)}</b></div>
+            </div>`;
+            
+            // Plotly 2D Data
+            // Parallelogram points: (0,0) -> u -> u+v -> v -> (0,0)
+            let x = [0, u[0], u[0]+v[0], v[0], 0];
+            let y = [0, u[1], u[1]+v[1], v[1], 0];
+            
+            plotData = [
+                { x: x, y: y, fill: 'toself', type: 'scatter', mode: 'lines+markers', name: 'Hình bình hành', fillcolor: 'rgba(14, 165, 233, 0.2)', line: {color: '#0ea5e9'} },
+                { x: [0, u[0]], y: [0, u[1]], type: 'scatter', mode: 'lines+text', name: 'u', line: {color: '#ef4444', width: 3}, text: ['','u'], textposition: 'top right', textfont: {color: '#ef4444'} },
+                { x: [0, v[0]], y: [0, v[1]], type: 'scatter', mode: 'lines+text', name: 'v', line: {color: '#22c55e', width: 3}, text: ['','v'], textposition: 'top right', textfont: {color: '#22c55e'} }
+            ];
+            layout = {
+                title: { text: 'Biểu diễn Hình bình hành', font: { color: '#f1f5f9' } },
+                xaxis: { title: 'x', color: '#94a3b8', gridcolor: '#334155', zerolinecolor: '#475569', automargin: true },
+                yaxis: { title: 'y', scaleanchor: "x", scaleratio: 1, color: '#94a3b8', gridcolor: '#334155', zerolinecolor: '#475569', automargin: true },
+                showlegend: true, 
+                legend: { font: { color: '#f1f5f9' } },
+                margin: {t: 60, b: 40, l: 40, r: 40},
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                autosize: true
+            };
+
+        } else {
+            // 3D Case: Volume of Parallelepiped
+            let u = vectors[0];
+            let v = vectors[1];
+            let w = vectors[2];
+
+            // Cross product u x v
+            let cross_x = u[1]*v[2] - u[2]*v[1];
+            let cross_y = u[2]*v[0] - u[0]*v[2];
+            let cross_z = u[0]*v[1] - u[1]*v[0];
+            
+            // Dot product (u x v) . w
+            let detVal = cross_x*w[0] + cross_y*w[1] + cross_z*w[2];
+
+            resultHtml += `<div class="step-container">
+                <div class="step-description">Ý nghĩa hình học (3D)</div>
+                <div>Định thức của ma trận 3x3 là <b>Thể tích có hướng</b> của hình hộp (parallelepiped) tạo bởi ba vector cột, tính bằng <b>Tích hỗn tạp</b> (Scalar Triple Product).</div>
+                <div style="margin: 10px 0; font-family: monospace;">
+                    u = (${u.join(', ')})<br>v = (${v.join(', ')})<br>w = (${w.join(', ')})
+                </div>
+                <div class="step-description">Bước 1: Tính tích có hướng <b>p</b> = <b>u</b> × <b>v</b></div>
+                <div><b>p</b> = (${u[1]}⋅${v[2]} - ${u[2]}⋅${v[1]}, ${u[2]}⋅${v[0]} - ${u[0]}⋅${v[2]}, ${u[0]}⋅${v[1]} - ${u[1]}⋅${v[0]})</div>
+                <div><b>p</b> = (${cross_x}, ${cross_y}, ${cross_z})</div>
+                <br>
+                <div class="step-description">Bước 2: Tính tích vô hướng Vol = <b>p</b> ⋅ <b>w</b></div>
+                <div>Vol = ${cross_x}⋅${w[0]} + ${cross_y}⋅${w[1]} + ${cross_z}⋅${w[2]} = <b>${detVal}</b></div>
+                <div style="margin-top:5px;">Thể tích khối hộp = |${detVal}| = <b>${Math.abs(detVal)}</b></div>
+            </div>`;
+
+            // Plotly 3D Data - Draw vectors and the box edges
+            // Vertices: 0, u, v, w, u+v, u+w, v+w, u+v+w
+            // We draw lines connecting them
+            let O=[0,0,0];
+            let sum_uv = [u[0]+v[0], u[1]+v[1], u[2]+v[2]];
+            let sum_uw = [u[0]+w[0], u[1]+w[1], u[2]+w[2]];
+            let sum_vw = [v[0]+w[0], v[1]+w[1], v[2]+w[2]];
+            let sum_all = [u[0]+v[0]+w[0], u[1]+v[1]+w[1], u[2]+v[2]+w[2]];
+
+            // Constructing lines for the box
+            let x_lines = [0, u[0], sum_uv[0], v[0], 0, w[0], sum_uw[0], sum_all[0], sum_vw[0], w[0], null, u[0], sum_uw[0], null, v[0], sum_vw[0], null, sum_uv[0], sum_all[0]];
+            let y_lines = [0, u[1], sum_uv[1], v[1], 0, w[1], sum_uw[1], sum_all[1], sum_vw[1], w[1], null, u[1], sum_uw[1], null, v[1], sum_vw[1], null, sum_uv[1], sum_all[1]];
+            let z_lines = [0, u[2], sum_uv[2], v[2], 0, w[2], sum_uw[2], sum_all[2], sum_vw[2], w[2], null, u[2], sum_uw[2], null, v[2], sum_vw[2], null, sum_uv[2], sum_all[2]];
+
+            plotData = [{ type: 'scatter3d', mode: 'lines', x: x_lines, y: y_lines, z: z_lines, line: {width: 4, color: '#0ea5e9'}, name: 'Hình hộp' }];
+            layout = {
+                title: { text: 'Biểu diễn Hình hộp (3D)', font: { color: '#f1f5f9' } },
+                scene: { 
+                    aspectmode: "data",
+                    xaxis: { title: 'x', color: '#94a3b8', gridcolor: '#334155', backgroundcolor: 'rgba(0,0,0,0)', showbackground: false, automargin: true },
+                    yaxis: { title: 'y', color: '#94a3b8', gridcolor: '#334155', backgroundcolor: 'rgba(0,0,0,0)', showbackground: false, automargin: true },
+                    zaxis: { title: 'z', color: '#94a3b8', gridcolor: '#334155', backgroundcolor: 'rgba(0,0,0,0)', showbackground: false, automargin: true }
+                },
+                margin: {t: 60, b: 0, l: 0, r: 0},
+                height: 500,
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                autosize: true
+            };
+        }
+
+        stepsDiv.innerHTML += resultHtml + `<div id="geo-plot" style="width:100%; height:500px; border-radius:8px; margin-top:15px;"></div>`;
+        Plotly.newPlot('geo-plot', plotData, layout);
+        saveToHistory('Định Thức (Hình Học)', A_frac, null);
+    }
+
+    // 6. Hàm tính Định thức (Determinant) bằng biến đổi sơ cấp
+    function calculateDeterminant() {
+        const stepsDiv = document.getElementById('solution-steps');
+        stepsDiv.innerHTML = '<h2>Chi tiết tính Định thức (Biến đổi về dạng tam giác trên):</h2>';
+        let A = getMatrixFromInput();
+        let n = currentSize;
+        
+        // Copy matrix
+        let M = A.map(row => row.map(val => new Fraction(val.num, val.den)));
+        let detSign = new Fraction(1);
+        
+        renderStep(M, "Ma trận ban đầu");
+
+        for (let i = 0; i < n; i++) {
+            // 1. Tìm trụ (Pivot)
+            let pivot = M[i][i];
+            
+            // Nếu trụ bằng 0, tìm hàng dưới để đổi
+            if (pivot.isZero()) {
+                let swapRow = -1;
+                for (let k = i + 1; k < n; k++) {
+                    if (!M[k][i].isZero()) {
+                        swapRow = k;
+                        break;
+                    }
+                }
+                
+                if (swapRow !== -1) {
+                    [M[i], M[swapRow]] = [M[swapRow], M[i]];
+                    detSign = detSign.multiply(new Fraction(-1));
+                    renderStep(M, `Hoán đổi hàng ${i+1} và hàng ${swapRow+1} (Định thức đổi dấu).`, i, i);
+                    pivot = M[i][i];
+                } else {
+                    // Cột toàn số 0 => Định thức = 0
+                    stepsDiv.innerHTML += `<div class="step-container highlight" style="color:red; text-align:center; font-size: 1.2em;">
+                        Cột ${i+1} chứa toàn số 0 tại vị trí đường chéo trở xuống.<br>
+                        => Định thức = 0
+                    </div>`;
+                    return;
+                }
+            }
+
+            // 2. Khử các phần tử bên dưới trụ về 0
+            for (let k = i + 1; k < n; k++) {
+                let factor = M[k][i].divide(pivot);
+                if (!factor.isZero()) {
+                    for (let j = i; j < n; j++) {
+                        M[k][j] = M[k][j].subtract(factor.multiply(M[i][j]));
+                    }
+                    renderStep(M, `Lấy hàng ${k+1} trừ đi (${factor.toString()}) lần hàng ${i+1} (Định thức không đổi).`, k, i);
+                }
+            }
+        }
+
+        // 3. Tính tích đường chéo
+        let detVal = detSign;
+        let diagHtml = [];
+        for (let i = 0; i < n; i++) {
+            detVal = detVal.multiply(M[i][i]);
+            diagHtml.push(M[i][i].toString());
+        }
+
+        let resultHtml = `<div class="step-description">Bước cuối: Tính tích các phần tử trên đường chéo chính</div>`;
+        resultHtml += `<div style="font-size: 1.1em; line-height: 1.5;">`;
+        resultHtml += `det(A) = (Dấu do hoán đổi) × (Tích đường chéo)<br>`;
+        resultHtml += `det(A) = ${detSign.toString()} × (${diagHtml.join(' × ')})<br>`;
+        resultHtml += `</div>`;
+        resultHtml += `<br><div class="highlight" style="display:inline-block; padding:10px; font-size: 1.2em; color: #059669;">Kết quả: det(A) = ${detVal.toString()}</div>`;
+        
+        stepsDiv.appendChild(Object.assign(document.createElement('div'), {className: 'step-container', innerHTML: resultHtml}));
+        saveToHistory('Tính Định thức', A, null);
+    }
+
+    // 8. Hàm giải hệ phương trình tuyến tính Ax = B
+    function solveLinearSystem() {
+        document.getElementById('solution-steps').innerHTML = '<h2>Chi tiết giải hệ phương trình Ax = B:</h2>';
+        let A = getMatrixFromInput();
+        let B = getVectorBFromInput();
+        let n = currentSize;
+
+        // Tạo ma trận mở rộng [A | B]
+        let M = [];
+        for (let i = 0; i < n; i++) {
+            let row = [...A[i]];
+            row.push(B[i]);
+            M.push(row);
+        }
+
+        renderStep(M, "Bước 1: Lập ma trận mở rộng [A | B]");
+
+        // Gauss-Jordan
+        for (let i = 0; i < n; i++) {
+            let pivot = M[i][i];
+            
+            if (pivot.isZero()) {
+                let swapRow = -1;
+                for (let k = i + 1; k < n; k++) {
+                    if (!M[k][i].isZero()) { swapRow = k; break; }
+                }
+                if (swapRow !== -1) {
+                    [M[i], M[swapRow]] = [M[swapRow], M[i]];
+                    renderStep(M, `Hoán đổi hàng ${i+1} và hàng ${swapRow+1}.`, i, i);
+                    pivot = M[i][i];
+                }
+            }
+
+            if (!pivot.isZero()) {
+                if (!pivot.isOne()) {
+                    let pivotInv = new Fraction(pivot.den, pivot.num);
+                    for (let j = i; j <= n; j++) M[i][j] = M[i][j].multiply(pivotInv);
+                    renderStep(M, `Biến đổi hàng ${i+1} để phần tử trụ bằng 1.`, i, i);
+                }
+
+                for (let k = 0; k < n; k++) {
+                    if (k !== i) {
+                        let factor = M[k][i];
+                        if (!factor.isZero()) {
+                            for (let j = i; j <= n; j++) M[k][j] = M[k][j].subtract(factor.multiply(M[i][j]));
+                            renderStep(M, `Khử phần tử ở hàng ${k+1}, cột ${i+1}.`, k, i);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Kiểm tra kết quả
+        // Nếu đường chéo chính đều là 1 -> Nghiệm duy nhất nằm ở cột cuối cùng
+        // Nếu có hàng dạng [0 0 ... 0 | k] với k != 0 -> Vô nghiệm
+        renderStep(M, "Kết quả: Ma trận sau khi biến đổi (Cột cuối cùng là nghiệm nếu hệ có nghiệm duy nhất)");
+        saveToHistory('Giải Hệ PT (Ax=B)', A, B);
+    }
+
+    // Hàm nhân hai ma trận
+    function calculateMatrixMultiplication() {
+        document.getElementById('solution-steps').innerHTML = '<h2>Chi tiết nhân hai ma trận C = A × B:</h2>';
+        let A = getMatrixFromInput();
+        let B = getMatrixBFromInput();
+        
+        if (g_colsA !== g_rowsB) {
+            alert(`Không thể nhân ma trận! Số cột của A (${g_colsA}) phải bằng số hàng của B (${g_rowsB}).`);
+            return;
+        }
+
+        renderStep(A, "Ma trận A");
+        renderStep(B, "Ma trận B");
+
+        let C = Array(g_rowsA).fill(0).map(() => Array(g_colsB));
+        let stepsHtml = `<div class="step-container"><div class="step-description">Tính toán từng phần tử của ma trận kết quả C:</div><ul style="list-style: none; padding-left: 0;">`;
+
+        for (let i = 0; i < g_rowsA; i++) {
+            for (let j = 0; j < g_colsB; j++) {
+                let sum = new Fraction(0);
+                let formulaParts = [];
+                for (let k = 0; k < g_colsA; k++) {
+                    let prod = A[i][k].multiply(B[k][j]);
+                    sum = sum.add(prod);
+                    formulaParts.push(`(${A[i][k].toString()} × ${B[k][j].toString()})`);
+                }
+                C[i][j] = sum;
+                stepsHtml += `<li style="margin-bottom: 5px;">C<sub>${i+1}${j+1}</sub> = (Hàng ${i+1} của A) • (Cột ${j+1} của B) = ${formulaParts.join(' + ')} = <b>${sum.toString()}</b></li>`;
+            }
+        }
+        stepsHtml += `</ul></div>`;
+        document.getElementById('solution-steps').innerHTML += stepsHtml;
+
+        renderStep(C, "Kết quả: Ma trận tích C = A × B");
+        saveToHistory('Nhân Ma Trận (AxB)', A, null);
+    }
+
+    // Hàm tính lũy thừa ma trận
+    function calculateMatrixPower() {
+        document.getElementById('solution-steps').innerHTML = '<h2>Chi tiết tính Lũy thừa Ma trận A^k:</h2>';
+        let A = getMatrixFromInput();
+        let kInput = document.getElementById('exponent-k');
+        let k = parseInt(kInput ? kInput.value : 1);
+        let n = currentSize;
+
+        if (isNaN(k) || k < 1) {
+            alert("Vui lòng nhập số mũ k nguyên dương.");
+            return;
+        }
+
+        renderStep(A, "Ma trận A");
+
+        if (k === 1) {
+            renderStep(A, "Kết quả: A^1 = A");
+            return;
+        }
+
+        let Result = A; // A^1
+        
+        for (let exp = 2; exp <= k; exp++) {
+            let Next = Array(n).fill(0).map(() => Array(n));
+            for(let i=0; i<n; i++) {
+                for(let j=0; j<n; j++) {
+                    let sum = new Fraction(0);
+                    for(let x=0; x<n; x++) sum = sum.add(Result[i][x].multiply(A[x][j]));
+                    Next[i][j] = sum;
+                }
+            }
+            Result = Next;
+            renderStep(Result, `Lũy thừa bậc ${exp}: A^${exp} = A^${exp-1} × A`);
+        }
+        saveToHistory(`Lũy thừa A^${k}`, A, null);
+    }
+
+    // 9. Hàm tính Giá trị riêng (Eigenvalues)
+    function multiplyMatrices(A, B) {
+        const n = A.length;
+        let C = Array(n).fill(0).map(() => Array(n));
+        for(let i=0; i<n; i++) {
+            for(let j=0; j<n; j++) {
+                let sum = new Fraction(0);
+                for(let k=0; k<n; k++) sum = sum.add(A[i][k].multiply(B[k][j]));
+                C[i][j] = sum;
+            }
+        }
+        return C;
+    }
+
+    function calculateEigenvalues() {
+        const stepsDiv = document.getElementById('solution-steps');
+        stepsDiv.innerHTML = '<h2>Chi tiết tìm Giá trị riêng (Eigenvalues):</h2>';
+        let A = getMatrixFromInput();
+        let n = currentSize;
+
+        // Bước 1: Tìm đa thức đặc trưng bằng thuật toán Faddeev–Le Verrier
+        // P(λ) = λ^n - p_1*λ^(n-1) - p_2*λ^(n-2) - ... - p_n
+        let p = []; // Lưu các hệ số p_1, p_2, ...
+        let B = A.map(row => row.map(val => new Fraction(val.num, val.den))); // B_1 = A
+        
+        let step1Html = `<div class="step-description">Bước 1: Tìm đa thức đặc trưng P(λ) = det(λI - A)</div>`;
+        step1Html += `<div>Sử dụng thuật toán Faddeev–Le Verrier để xác định hệ số:</div><ul style="list-style-type: none;">`;
+
+        for (let k = 1; k <= n; k++) {
+            // Tính trace(B)
+            let tr = new Fraction(0);
+            for(let i=0; i<n; i++) tr = tr.add(B[i][i]);
+            
+            // p_k = trace(B) / k
+            let p_k = tr.divide(new Fraction(k));
+            p.push(p_k);
+            
+            step1Html += `<li>k=${k}: tr(B<sub>${k}</sub>) = ${tr.toString()} => p<sub>${k}</sub> = ${p_k.toString()}</li>`;
+
+            if (k < n) {
+                // M = B - p_k * I
+                let M = B.map((row, i) => row.map((val, j) => i === j ? val.subtract(p_k) : val));
+                // B_next = A * M
+                B = multiplyMatrices(A, M);
+            }
+        }
+        step1Html += `</ul>`;
+        
+        // Hiển thị đa thức
+        let polyStr = `λ<sup>${n}</sup>`;
+        for(let i=0; i<n; i++) {
+            let val = p[i];
+            if (val.isZero()) continue;
+            let sign = val.num > 0 ? " - " : " + "; // Vì công thức là - p_k
+            let absVal = new Fraction(Math.abs(val.num), val.den).toString();
+            polyStr += `${sign}${absVal}λ<sup>${n-1-i}</sup>`;
+        }
+        polyStr = polyStr.replace("λ<sup>0</sup>", "").replace("λ<sup>1</sup>", "λ");
+        step1Html += `<div class="highlight" style="padding:10px; margin-top:10px;">Đa thức đặc trưng: P(λ) = ${polyStr} = 0</div>`;
+        stepsDiv.appendChild(Object.assign(document.createElement('div'), {className: 'step-container', innerHTML: step1Html}));
+
+        // Bước 2: Giải nghiệm đa thức (Durand-Kerner method)
+        // Coefficients for x^n + a_{n-1}x^{n-1} + ... + a_0 = 0
+        // a_{n-k} = -p_k
+        let coeffs = [1];
+        for(let val of p) coeffs.push(-val.num / val.den);
+
+        // Solver (Tìm nghiệm phức)
+        let roots = [];
+        for(let i=0; i<n; i++) {
+            let angle = 2 * Math.PI * i / n + 0.1; // Offset angle
+            roots.push({re: Math.cos(angle), im: Math.sin(angle)});
+        }
+
+        for(let iter=0; iter<100; iter++) {
+            for(let i=0; i<n; i++) {
+                let z = roots[i];
+                // Eval P(z)
+                let pVal = {re: coeffs[0], im: 0};
+                for(let k=1; k<=n; k++) {
+                    pVal = {re: pVal.re * z.re - pVal.im * z.im + coeffs[k], im: pVal.re * z.im + pVal.im * z.re};
+                }
+                // Eval Product (z - z_j)
+                let prod = {re: 1, im: 0};
+                for(let j=0; j<n; j++) {
+                    if (i === j) continue;
+                    let diff = {re: z.re - roots[j].re, im: z.im - roots[j].im};
+                    prod = {re: prod.re * diff.re - prod.im * diff.im, im: prod.re * diff.im + prod.im * diff.re};
+                }
+                // Delta = P(z) / Prod
+                let denom = prod.re * prod.re + prod.im * prod.im;
+                let delta = {re: (pVal.re * prod.re + pVal.im * prod.im)/denom, im: (pVal.im * prod.re - pVal.re * prod.im)/denom};
+                roots[i].re -= delta.re; roots[i].im -= delta.im;
+            }
+        }
+
+        let resultHtml = `<div class="step-description">Bước 2: Giải phương trình đa thức để tìm nghiệm (Giá trị riêng)</div>`;
+        resultHtml += `<ul>`;
+        roots.forEach((r, idx) => {
+            let re = Math.abs(r.re) < 1e-9 ? 0 : r.re;
+            let im = Math.abs(r.im) < 1e-9 ? 0 : r.im;
+            let valStr = re.toFixed(4);
+            if (im !== 0) valStr += (im > 0 ? " + " : " - ") + Math.abs(im).toFixed(4) + "i";
+            resultHtml += `<li>λ<sub>${idx+1}</sub> ≈ <b>${valStr}</b></li>`;
+        });
+        resultHtml += `</ul>`;
+        stepsDiv.appendChild(Object.assign(document.createElement('div'), {className: 'step-container', innerHTML: resultHtml}));
+        
+        findAndDisplayEigenvectors(roots, A);
+        saveToHistory('Tìm Giá trị riêng & Vector riêng', A, null);
+    }
+
+    // --- Các hàm cho Vector riêng ---
+
+    class Complex {
+        constructor(re = 0, im = 0) {
+            this.re = re;
+            this.im = im;
+        }
+        add(other) { return new Complex(this.re + other.re, this.im + other.im); }
+        subtract(other) { return new Complex(this.re - other.re, this.im - other.im); }
+        multiply(other) {
+            const re = this.re * other.re - this.im * other.im;
+            const im = this.re * other.im + this.im * other.re;
+            return new Complex(re, im);
+        }
+        divide(other) {
+            const denom = other.re * other.re + other.im * other.im;
+            if (denom === 0) return new Complex(NaN, NaN);
+            const re = (this.re * other.re + this.im * other.im) / denom;
+            const im = (this.im * other.re - this.re * other.im) / denom;
+            return new Complex(re, im);
+        }
+        magnitude() { return Math.sqrt(this.re * this.re + this.im * this.im); }
+        isZero(tolerance = 1e-9) { return this.magnitude() < tolerance; }
+        toString(precision = 4) {
+            const rePart = Math.abs(this.re) < 1e-9 ? 0 : this.re;
+            const imPart = Math.abs(this.im) < 1e-9 ? 0 : this.im;
+            if (imPart === 0) return rePart.toFixed(precision);
+            if (rePart === 0) return `${imPart.toFixed(precision)}i`;
+            return `${rePart.toFixed(precision)} ${imPart > 0 ? '+' : '-'} ${Math.abs(imPart).toFixed(precision)}i`;
+        }
+    }
+
+    function renderComplexMatrixStep(matrix, description) {
+        const stepsDiv = document.getElementById('solution-steps');
+        const stepBox = document.createElement('div');
+        stepBox.className = 'step-container';
+        let html = `<div class="step-description">${description}</div>`;
+        html += `<div style="text-align:center; overflow-x:auto;"><div class="matrix-display"><table>`;
+        for (let i = 0; i < matrix.length; i++) {
+            html += `<tr>`;
+            for (let j = 0; j < matrix[i].length; j++) {
+                html += `<td style="padding: 5px 8px; min-width: 80px;">${matrix[i][j].toString(2)}</td>`;
+            }
+            html += `</tr>`;
+        }
+        html += `</table></div></div>`;
+        stepBox.innerHTML = html;
+        stepsDiv.appendChild(stepBox);
+    }
+
+    function renderEigenvectors(eigenvalue, basis) {
+        const stepsDiv = document.getElementById('solution-steps');
+        const stepBox = document.createElement('div');
+        stepBox.className = 'step-container';
+        let html = `<div class="step-description">Vector riêng ứng với giá trị riêng λ ≈ ${eigenvalue.toString(4)}:</div>`;
+        if (basis.length === 0) {
+            html += `<div>Không gian riêng là vector không {0} (có thể do lỗi tính toán).</div>`;
+        } else {
+            html += `<div>Không gian riêng (eigenspace) được sinh bởi các vector cơ sở:</div>`;
+            basis.forEach((vector, i) => {
+                const columnVector = vector.map(c => [c.toString(2)]);
+                html += `<div style="display: inline-block; vertical-align: top; margin: 10px;">v<sub>${i+1}</sub> = ${matrixToHtmlTable(columnVector)}</div>`;
+            });
+        }
+        stepBox.innerHTML = html;
+        stepsDiv.appendChild(stepBox);
+    }
+
+    function gaussJordanComplex(matrix) {
+        const M = matrix.map(row => row.map(c => new Complex(c.re, c.im)));
+        const rows = M.length;
+        const cols = M[0].length;
+        let pivotRow = 0;
+        for (let col = 0; col < cols && pivotRow < rows; col++) {
+            let i_max = pivotRow;
+            for (let i = pivotRow + 1; i < rows; i++) {
+                if (M[i][col].magnitude() > M[i_max][col].magnitude()) i_max = i;
+            }
+            [M[pivotRow], M[i_max]] = [M[i_max], M[pivotRow]];
+            let pivot = M[pivotRow][col];
+            if (pivot.isZero()) continue;
+            let pivotInv = new Complex(1, 0).divide(pivot);
+            for (let j = col; j < cols; j++) M[pivotRow][j] = M[pivotRow][j].multiply(pivotInv);
+            for (let i = 0; i < rows; i++) {
+                if (i !== pivotRow) {
+                    let factor = M[i][col];
+                    for (let j = col; j < cols; j++) M[i][j] = M[i][j].subtract(factor.multiply(M[pivotRow][j]));
+                }
+            }
+            pivotRow++;
+        }
+        return M;
+    }
+
+    function findAndDisplayEigenvectors(eigenvalues, matrixA) {
+        const n = matrixA.length;
+        const stepsDiv = document.getElementById('solution-steps');
+        let headerHtml = `<div class="step-container"><div class="step-description" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">Bước 3: Tìm vector riêng cho mỗi giá trị riêng</div></div>`;
+        stepsDiv.insertAdjacentHTML('beforeend', headerHtml);
+
+        eigenvalues.forEach((lambda, index) => {
+            const M = Array(n).fill(0).map(() => Array(n));
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    const a_ij = new Complex(matrixA[i][j].num / matrixA[i][j].den, 0);
+                    M[i][j] = (i === j) ? a_ij.subtract(lambda) : a_ij;
+                }
+            }
+            renderComplexMatrixStep(M, `Thiết lập hệ (A - λI)x = 0 với λ<sub>${index+1}</sub> ≈ ${lambda.toString(4)}`);
+            const rrefM = gaussJordanComplex(M);
+            renderComplexMatrixStep(rrefM, `Đưa về dạng bậc thang rút gọn (RREF)`);
+            const basis = findNullSpace(rrefM);
+            renderEigenvectors(lambda, basis);
+        });
+    }
+
+    function findNullSpace(rrefMatrix) {
+        const rows = rrefMatrix.length;
+        const cols = rrefMatrix[0].length;
+        const basis = [];
+        const pivotCols = [];
+        let lastPivotRow = -1;
+        for (let j = 0; j < cols && lastPivotRow < rows - 1; j++) {
+            let pivotRow = -1;
+            for (let i = lastPivotRow + 1; i < rows; i++) {
+                if (!rrefMatrix[i][j].isZero()) { pivotRow = i; break; }
+            }
+            if (pivotRow !== -1) {
+                pivotCols[j] = pivotRow;
+                lastPivotRow = pivotRow;
+            }
+        }
+        for (let j = 0; j < cols; j++) {
+            if (pivotCols[j] === undefined) {
+                const vector = Array(cols).fill(new Complex(0, 0));
+                vector[j] = new Complex(1, 0);
+                for (let pivotCol = 0; pivotCol < j; pivotCol++) {
+                    if (pivotCols[pivotCol] !== undefined) {
+                        const pivotRow = pivotCols[pivotCol];
+                        vector[pivotCol] = rrefMatrix[pivotRow][j].multiply(new Complex(-1, 0));
+                    }
+                }
+                basis.push(vector);
+            }
+        }
+        return basis;
+    }
+
+    // 10. Hàm xuất ảnh
+    function exportToImage() {
+        const element = document.body;
+        html2canvas(element, {
+            ignoreElements: (node) => node.classList && node.classList.contains('export-buttons')
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'giai-bai-tap-dai-so.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+
+    // 11. Hàm nhập từ CSV
+    function populateMatrixFromCSV(data) {
+        const cleanData = data.filter(row => row.length > 1 || (row.length === 1 && row[0].trim() !== ''));
+        if (cleanData.length === 0) {
+            alert("Lỗi: File CSV trống hoặc không có dữ liệu hợp lệ.");
+            return;
+        }
+
+        const numRows = cleanData.length;
+        const numCols = cleanData[0].length;
+
+        if (numRows > 6 || numCols > 7) {
+            alert("Lỗi: Kích thước ma trận quá lớn. Công cụ chỉ hỗ trợ tối đa 6x6.");
+            return;
+        }
+
+        if (numRows !== numCols && numRows !== (numCols - 1)) {
+            alert(`Lỗi: Dữ liệu không phải là ma trận vuông (N x N) hoặc ma trận mở rộng (N x N+1). Kích thước hiện tại: ${numRows}x${numCols}`);
+            return;
+        }
+        
+        const matrixSize = numRows;
+        const hasBVector = numCols === numRows + 1;
+
+        document.getElementById('size').value = matrixSize;
+        generateInputs(); // Tạo lại lưới input
+
+        for (let i = 0; i < matrixSize; i++) {
+            for (let j = 0; j < matrixSize; j++) {
+                const inputA = document.getElementById(`m-${i}-${j}`);
+                if (inputA && cleanData[i] && cleanData[i][j] !== undefined) {
+                    inputA.value = cleanData[i][j].trim();
+                }
+            }
+            if (hasBVector) {
+                const inputB = document.getElementById(`b-${i}`);
+                if (inputB && cleanData[i] && cleanData[i][matrixSize] !== undefined) {
+                    inputB.value = cleanData[i][matrixSize].trim();
+                }
+            }
+        }
+        
+        alert(`Đã tải lên thành công ma trận kích thước ${matrixSize}x${numCols}.`);
+    }
+
+    function handleFileImport(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        Papa.parse(file, {
+            complete: (results) => populateMatrixFromCSV(results.data),
+            error: (error) => alert("Đã xảy ra lỗi khi đọc file CSV. Vui lòng kiểm tra lại định dạng file.")
+        });
+        event.target.value = ''; // Reset để có thể chọn lại cùng 1 file
+    }
+
+    // 7. Hàm tính Hạng của Ma trận (Rank)
+    function calculateRank() {
+        document.getElementById('solution-steps').innerHTML = '<h2>Chi tiết tìm Hạng của Ma trận (Rank):</h2>';
+        let A = getMatrixFromInput();
+        let n = currentSize;
+        // Copy ma trận (deep copy với Fraction)
+        let M = A.map(row => row.map(val => new Fraction(val.num, val.den)));
+
+        renderStep(M, "Ma trận ban đầu");
+
+        let pivotRow = 0;
+        for (let col = 0; col < n && pivotRow < n; col++) {
+            // Tìm hàng có phần tử khác 0 tại cột hiện tại (từ pivotRow trở xuống)
+            let sel = -1;
+            for (let i = pivotRow; i < n; i++) {
+                if (!M[i][col].isZero()) {
+                    sel = i;
+                    break;
+                }
+            }
+
+            if (sel === -1) continue; // Cột này toàn 0, bỏ qua
+
+            // Hoán đổi hàng đưa phần tử khác 0 lên vị trí pivot
+            if (pivotRow !== sel) {
+                [M[pivotRow], M[sel]] = [M[sel], M[pivotRow]];
+                renderStep(M, `Hoán đổi hàng ${pivotRow + 1} và hàng ${sel + 1}.`, pivotRow, col);
+            }
+
+            // Khử các hàng bên dưới về 0
+            for (let i = pivotRow + 1; i < n; i++) {
+                let factor = M[i][col].divide(M[pivotRow][col]);
+                if (!factor.isZero()) {
+                    for (let j = col; j < n; j++) {
+                        M[i][j] = M[i][j].subtract(factor.multiply(M[pivotRow][j]));
+                    }
+                    renderStep(M, `Lấy hàng ${i + 1} trừ đi (${factor.toString()}) lần hàng ${pivotRow + 1}.`, i, col);
+                }
+            }
+            pivotRow++;
+        }
+
+        // Đếm số hàng khác 0 (Rank)
+        let rank = 0;
+        for(let i = 0; i < n; i++) {
+            if (M[i].some(val => !val.isZero())) {
+                rank++;
+            }
+        }
+
+        const stepsDiv = document.getElementById('solution-steps');
+        stepsDiv.innerHTML += `<div class="step-container highlight" style="text-align:center; font-size: 1.2em; color: #7c3aed;">Kết quả: Hạng của ma trận (Rank) = ${rank}</div>`;
+        saveToHistory('Tìm Hạng ma trận', A, null);
+    }
+
+    // Khởi tạo ban đầu
+    // generateInputs(); // Không cần gọi ngay, đợi chọn mode
+    document.getElementById('csv-input').addEventListener('change', handleFileImport);
+
+    // --- Laplace Transform Logic ---
+    function setupLaplaceUI() {
+        const select = document.getElementById('laplace-func-type');
+        const isInverse = MODES[currentMode].isInverse;
+        select.innerHTML = '';
+        
+        const options = isInverse ? [
+            {val: 'inv_const', text: 'C / s'},
+            {val: 'inv_poly', text: 'C / s^n'},
+            {val: 'inv_exp', text: '1 / (s - a)'},
+            {val: 'inv_sin', text: 'k / (s^2 + k^2)'},
+            {val: 'inv_cos', text: 's / (s^2 + k^2)'},
+            {val: 'inv_exp_sin', text: 'k / ((s-a)^2 + k^2)'},
+            {val: 'inv_exp_cos', text: '(s-a) / ((s-a)^2 + k^2)'}
+        ] : [
+            {val: 'const', text: 'Hằng số (C)'},
+            {val: 'poly', text: 'Đa thức (t^n)'},
+            {val: 'exp', text: 'Mũ (e^at)'},
+            {val: 'sin', text: 'Sin (sin kt)'},
+            {val: 'cos', text: 'Cos (cos kt)'},
+            {val: 'exp_sin', text: 'e^at * sin(kt)'},
+            {val: 'exp_cos', text: 'e^at * cos(kt)'}
+        ];
+
+        options.forEach(opt => {
+            const el = document.createElement('option');
+            el.value = opt.val;
+            el.innerText = opt.text;
+            select.appendChild(el);
+        });
+        
+        const label = document.getElementById('laplace-label');
+        const btn = document.getElementById('laplace-btn');
+        label.innerText = isInverse ? "Chọn hàm F(s): " : "Chọn hàm f(t): ";
+        btn.innerText = isInverse ? "Biến đổi ngược sang f(t)" : "Biến đổi sang F(s)";
+        btn.onclick = isInverse ? calculateInverseLaplaceTransform : calculateLaplaceTransform;
+        
+        updateLaplaceInputs();
+    }
+
+    function updateLaplaceInputs() {
+        const type = document.getElementById('laplace-func-type').value;
+        const container = document.getElementById('laplace-inputs');
+        container.innerHTML = '';
+
+        const addInput = (id, label, defaultVal = 1) => {
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = `<label style="margin-right:5px; font-weight:bold;">${label} = </label>`;
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.id = id;
+            input.value = defaultVal;
+            input.style.width = '70px';
+            input.style.padding = '8px';
+            input.style.borderRadius = '6px';
+            input.style.border = '1px solid var(--border-color)';
+            input.style.background = 'var(--input-bg)';
+            input.style.color = 'var(--text-main)';
+            input.style.textAlign = 'center';
+            wrapper.appendChild(input);
+            container.appendChild(wrapper);
+        };
+
+        if (type === 'const') addInput('lp-c', 'C', 5);
+        if (type === 'poly') addInput('lp-n', 'n', 2);
+        if (type === 'exp' || type === 'exp_sin' || type === 'exp_cos') addInput('lp-a', 'a', 2);
+        if (type === 'sin' || type === 'cos' || type === 'exp_sin' || type === 'exp_cos') addInput('lp-k', 'k', 3);
+        
+        // Inverse inputs
+        if (type === 'inv_const') addInput('lp-c', 'C', 1);
+        if (type === 'inv_poly') { addInput('lp-c', 'C', 1); addInput('lp-n', 'n', 2); }
+        if (type === 'inv_exp' || type === 'inv_exp_sin' || type === 'inv_exp_cos') addInput('lp-a', 'a', 2);
+        if (type === 'inv_sin' || type === 'inv_cos' || type === 'inv_exp_sin' || type === 'inv_exp_cos') addInput('lp-k', 'k', 3);
+    }
+
+    function renderLaplaceTheory() {
+        const isInverse = MODES[currentMode].isInverse;
+        const stepsDiv = document.getElementById('solution-steps');
+        stepsDiv.innerHTML = `
+            <div class="step-container">
+                <div class="step-description">Bảng công thức Laplace ${isInverse ? 'Ngược' : ''} cơ bản</div>
+                <table style="width:100%; border-collapse: collapse; margin-top:10px;">
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <th style="padding:10px; text-align:left;">${isInverse ? 'Hàm ảnh F(s)' : 'Hàm gốc f(t)'}</th>
+                        <th style="padding:10px; text-align:left;">${isInverse ? 'Hàm gốc f(t)' : 'Biến đổi F(s)'}</th>
+                    </tr>
+                    ${isInverse ? `
+                    <tr><td style="padding:8px;">1/s</td><td style="padding:8px;">1</td></tr>
+                    <tr><td style="padding:8px;">1/s^n</td><td style="padding:8px;">t^(n-1) / (n-1)!</td></tr>
+                    <tr><td style="padding:8px;">1/(s-a)</td><td style="padding:8px;">e^(at)</td></tr>
+                    <tr><td style="padding:8px;">k/(s^2+k^2)</td><td style="padding:8px;">sin(kt)</td></tr>
+                    <tr><td style="padding:8px;">s/(s^2+k^2)</td><td style="padding:8px;">cos(kt)</td></tr>
+                    ` : `
+                    <tr><td style="padding:8px;">1</td><td style="padding:8px;">1/s</td></tr>
+                    <tr><td style="padding:8px;">t^n</td><td style="padding:8px;">n! / s^(n+1)</td></tr>
+                    <tr><td style="padding:8px;">e^(at)</td><td style="padding:8px;">1 / (s - a)</td></tr>
+                    <tr><td style="padding:8px;">sin(kt)</td><td style="padding:8px;">k / (s^2 + k^2)</td></tr>
+                    <tr><td style="padding:8px;">cos(kt)</td><td style="padding:8px;">s / (s^2 + k^2)</td></tr>
+                    `}
+                </table>
+            </div>
+        `;
+    }
+
+    function calculateLaplaceTransform() {
+        const type = document.getElementById('laplace-func-type').value;
+        const stepsDiv = document.getElementById('solution-steps');
+        
+        renderLaplaceTheory();
+
+        let result = '';
+        let formula = '';
+        let inputDesc = '';
+
+        const getVal = (id) => parseFloat(document.getElementById(id).value);
+
+        if (type === 'const') {
+            const c = getVal('lp-c');
+            inputDesc = `f(t) = ${c}`;
+            formula = `L{C} = C/s`;
+            result = `${c}/s`;
+        } else if (type === 'poly') {
+            const n = getVal('lp-n');
+            if (n < 0 || !Number.isInteger(n)) { alert('n phải là số nguyên dương'); return; }
+            inputDesc = `f(t) = t^${n}`;
+            let fact = 1; for(let i=2; i<=n; i++) fact *= i;
+            formula = `L{t^n} = n! / s^(n+1)`;
+            result = `${fact} / s^${n+1}`;
+        } else if (type === 'exp') {
+            const a = getVal('lp-a');
+            inputDesc = `f(t) = e^(${a}t)`;
+            formula = `L{e^at} = 1 / (s - a)`;
+            const sign = a >= 0 ? '-' : '+';
+            result = `1 / (s ${sign} ${Math.abs(a)})`;
+        } else if (type === 'sin') {
+            const k = getVal('lp-k');
+            inputDesc = `f(t) = sin(${k}t)`;
+            formula = `L{sin(kt)} = k / (s^2 + k^2)`;
+            result = `${k} / (s^2 + ${k*k})`;
+        } else if (type === 'cos') {
+            const k = getVal('lp-k');
+            inputDesc = `f(t) = cos(${k}t)`;
+            formula = `L{cos(kt)} = s / (s^2 + k^2)`;
+            result = `s / (s^2 + ${k*k})`;
+        } else if (type === 'exp_sin') {
+            const a = getVal('lp-a');
+            const k = getVal('lp-k');
+            inputDesc = `f(t) = e^(${a}t)sin(${k}t)`;
+            formula = `L{e^at sin(kt)} = k / ((s-a)^2 + k^2)`;
+            const sign = a >= 0 ? '-' : '+';
+            result = `${k} / ((s ${sign} ${Math.abs(a)})^2 + ${k*k})`;
+        } else if (type === 'exp_cos') {
+            const a = getVal('lp-a');
+            const k = getVal('lp-k');
+            inputDesc = `f(t) = e^(${a}t)cos(${k}t)`;
+            formula = `L{e^at cos(kt)} = (s-a) / ((s-a)^2 + k^2)`;
+            const sign = a >= 0 ? '-' : '+';
+            result = `(s ${sign} ${Math.abs(a)}) / ((s ${sign} ${Math.abs(a)})^2 + ${k*k})`;
+        }
+
+        const resultHtml = `
+            <div class="step-container highlight" style="border-left-color: #f59e0b;">
+                <div class="step-description">Kết quả biến đổi:</div>
+                <div style="font-size: 1.2em; margin-bottom: 10px;">${inputDesc}</div>
+                <div style="margin-bottom: 10px; color: var(--text-muted);">Áp dụng công thức: ${formula}</div>
+                <div style="font-size: 1.5em; font-weight: bold; color: #d97706;">F(s) = ${result}</div>
+            </div>
+        `;
+        stepsDiv.insertAdjacentHTML('afterbegin', resultHtml);
+    }
+
+    function calculateInverseLaplaceTransform() {
+        const type = document.getElementById('laplace-func-type').value;
+        const stepsDiv = document.getElementById('solution-steps');
+        renderLaplaceTheory();
+
+        let result = '';
+        let formula = '';
+        let inputDesc = '';
+        const getVal = (id) => parseFloat(document.getElementById(id).value);
+
+        if (type === 'inv_const') {
+            const c = getVal('lp-c');
+            inputDesc = `F(s) = ${c}/s`;
+            formula = `L⁻¹{C/s} = C`;
+            result = `${c}`;
+        } else if (type === 'inv_poly') {
+            const c = getVal('lp-c');
+            const n = getVal('lp-n');
+            if (n <= 0 || !Number.isInteger(n)) { alert('n phải là số nguyên dương'); return; }
+            inputDesc = `F(s) = ${c}/s^${n}`;
+            formula = `L⁻¹{1/s^n} = t^(n-1) / (n-1)!`;
+            let fact = 1; for(let i=2; i<n; i++) fact *= i; // (n-1)!
+            result = `${c}/${fact} * t^${n-1}`;
+            if (c % fact === 0) result = `${c/fact}t^${n-1}`;
+        } else if (type === 'inv_exp') {
+            const a = getVal('lp-a');
+            const sign = a >= 0 ? '-' : '+';
+            inputDesc = `F(s) = 1 / (s ${sign} ${Math.abs(a)})`;
+            formula = `L⁻¹{1/(s-a)} = e^(at)`;
+            result = `e^(${a}t)`;
+        } else if (type === 'inv_sin') {
+            const k = getVal('lp-k');
+            inputDesc = `F(s) = ${k} / (s^2 + ${k*k})`;
+            formula = `L⁻¹{k/(s^2+k^2)} = sin(kt)`;
+            result = `sin(${k}t)`;
+        } else if (type === 'inv_cos') {
+            const k = getVal('lp-k');
+            inputDesc = `F(s) = s / (s^2 + ${k*k})`;
+            formula = `L⁻¹{s/(s^2+k^2)} = cos(kt)`;
+            result = `cos(${k}t)`;
+        } else if (type === 'inv_exp_sin') {
+            const a = getVal('lp-a');
+            const k = getVal('lp-k');
+            const sign = a >= 0 ? '-' : '+';
+            inputDesc = `F(s) = ${k} / ((s ${sign} ${Math.abs(a)})^2 + ${k*k})`;
+            formula = `L⁻¹{k/((s-a)^2+k^2)} = e^(at)sin(kt)`;
+            result = `e^(${a}t)sin(${k}t)`;
+        } else if (type === 'inv_exp_cos') {
+            const a = getVal('lp-a');
+            const k = getVal('lp-k');
+            const sign = a >= 0 ? '-' : '+';
+            inputDesc = `F(s) = (s ${sign} ${Math.abs(a)}) / ((s ${sign} ${Math.abs(a)})^2 + ${k*k})`;
+            formula = `L⁻¹{(s-a)/((s-a)^2+k^2)} = e^(at)cos(kt)`;
+            result = `e^(${a}t)cos(${k}t)`;
+        }
+
+        const resultHtml = `
+            <div class="step-container highlight" style="border-left-color: #d97706;">
+                <div class="step-description">Kết quả biến đổi ngược:</div>
+                <div style="font-size: 1.2em; margin-bottom: 10px;">${inputDesc}</div>
+                <div style="margin-bottom: 10px; color: var(--text-muted);">Áp dụng công thức: ${formula}</div>
+                <div style="font-size: 1.5em; font-weight: bold; color: #d97706;">f(t) = ${result}</div>
+            </div>
+        `;
+        stepsDiv.insertAdjacentHTML('afterbegin', resultHtml);
+    }
+
+    // --- Lịch sử (LocalStorage) ---
+    const HISTORY_KEY = 'matrixSolverHistory';
+    const MAX_HISTORY_ITEMS = 20;
+
+    function saveToHistory(type, matrixA, vectorB) {
+        const solutionHtml = document.getElementById('solution-steps').innerHTML;
+        if (!solutionHtml || solutionHtml.trim() === '') return;
+
+        let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+
+        const newEntry = {
+            id: Date.now(),
+            type: type,
+            matrixA: matrixA,
+            vectorB: vectorB,
+            solution: solutionHtml,
+            timestamp: new Date().toISOString()
+        };
+
+        history.unshift(newEntry);
+        if (history.length > MAX_HISTORY_ITEMS) history = history.slice(0, MAX_HISTORY_ITEMS);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+
+    function openHistoryModal() {
+        renderHistory();
+        document.getElementById('history-modal').style.display = 'flex';
+    }
+
+    function closeHistoryModal() {
+        document.getElementById('history-modal').style.display = 'none';
+    }
+
+    function renderHistory() {
+        const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+        const list = document.getElementById('history-list');
+        list.innerHTML = history.length === 0 ? '<li>Chưa có bài toán nào được giải.</li>' : history.map(item => {
+            const time = new Date(item.timestamp);
+            const size = item.matrixA.length;
+            return `<li>
+                <div class="history-info">
+                    <div class="history-type">${item.type} (${size}x${size})</div>
+                    <div class="history-time">${time.toLocaleString('vi-VN')}</div>
+                </div>
+                <div class="history-actions">
+                    <button onclick="loadFromHistory(${item.id})">Xem lại</button>
+                    <button onclick="deleteFromHistory(${item.id})" style="background: #ef4444">Xóa</button>
+                </div>
+            </li>`;
+        }).join('');
+    }
+
+    function loadFromHistory(id) {
+        const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+        const item = history.find(h => h.id === id);
+        if (!item) return;
+        document.getElementById('size').value = item.matrixA.length;
+        generateInputs();
+        for (let i = 0; i < item.matrixA.length; i++) {
+            for (let j = 0; j < item.matrixA.length; j++) document.getElementById(`m-${i}-${j}`).value = new Fraction(item.matrixA[i][j].num, item.matrixA[i][j].den).toString();
+            if (item.vectorB && item.vectorB[i]) document.getElementById(`b-${i}`).value = new Fraction(item.vectorB[i].num, item.vectorB[i].den).toString();
+        }
+        document.getElementById('solution-steps').innerHTML = item.solution;
+        closeHistoryModal();
+    }
+
+    function clearAllHistory() {
+        if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử?')) {
+            localStorage.removeItem(HISTORY_KEY);
+            renderHistory();
+        }
+    }
+
+    function deleteFromHistory(id) {
+        let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+        history = history.filter(h => h.id !== id);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+        renderHistory();
+    }
+    
+    window.addEventListener('resize', () => {
+        const plotDiv = document.getElementById('geo-plot');
+        if (plotDiv) {
+            Plotly.Plots.resize(plotDiv);
+        }
+    });
+</script>
+
+</body>
+</html>
+
+           
+
